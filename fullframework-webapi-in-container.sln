@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fullframework-webapi-in-container", "fullframework-webapi-in-container.csproj", "{0662E6DB-8DF7-461A-9FA0-895F34C26A7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fullframework-webapi-in-container", ".\ServiceHost\fullframework-webapi-in-container.csproj", "{0662E6DB-8DF7-461A-9FA0-895F34C26A7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "..\Application\Application.csproj", "{9D7593A8-AF31-416F-BABA-BE799DE637C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", ".\Application\Application.csproj", "{9D7593A8-AF31-416F-BABA-BE799DE637C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "..\UnitTests\UnitTests.csproj", "{F989216B-356A-40FA-A57E-1B20F62AF5FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", ".\UnitTests\UnitTests.csproj", "{F989216B-356A-40FA-A57E-1B20F62AF5FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
