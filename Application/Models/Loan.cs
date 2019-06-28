@@ -28,7 +28,6 @@ namespace Application.Models
             var primaryBorrower = Person.MapFrom(loanObject, FieldList.PrimaryBorrower, original?.PrimaryBorrower);
             var secondaryBorrower = Person.MapFrom(loanObject, FieldList.SecondaryBorrower, original?.SecondaryBorrower);
 
-
             if (loanObject.ContainsValues(FieldList.LoanAmount) || address != null || primaryBorrower != null || secondaryBorrower != null)
             {
                 if (original == null)

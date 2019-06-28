@@ -1,11 +1,13 @@
 ﻿using System;
-using Application.Models;
+using Models;
+using Models.Loan;
+using Mapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTests
 {
     [TestClass]
-    public class MappingTests
+    public class MapperTests
     {
         [TestMethod]
         public void FromLoanToLoanObject()
@@ -29,7 +31,7 @@ namespace UnitTests
                 }
             };
 
-            LoanObject newLoanObject = new LoanObject();
+            Application.Models.LoanObject newLoanObject = new Application.Models.LoanObject();
 
             originalLoan.MapTo(newLoanObject);
 
@@ -47,7 +49,7 @@ namespace UnitTests
         public void FromLoanObjectToLoan()
         {
 
-            LoanObject originalLoan = new LoanObject();
+            Application.Models.LoanObject originalLoan = new Application.Models.LoanObject();
 
             originalLoan.SetValue(FieldList.LoanAmount, "250000.01");
             originalLoan.SetValue(FieldList.PrimaryBorrower.FirstName, "Joe");
@@ -58,7 +60,7 @@ namespace UnitTests
             originalLoan.SetValue(FieldList.PrimaryBorrower.HomeAddress.State, "Texas");
             originalLoan.SetValue(FieldList.PrimaryBorrower.HomeAddress.Zip, "75001");
 
-            Loan newLoanObject = Loan.MapFrom(originalLoan);
+            Loan newLoanObject = LoanExtension.MapFrom(originalLoan);
 
             Assert.AreEqual(250000.01, newLoanObject.LoanAmount);
             Assert.AreEqual("Joe", newLoanObject.PrimaryBorrower.FirstName);

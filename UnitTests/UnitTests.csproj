@@ -49,7 +49,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MappingTests.cs" />
+    <Compile Include="MapperTests.cs" />
+    <Compile Include="RawMappingTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +60,14 @@
     <ProjectReference Include="..\Application\Application.csproj">
       <Project>{9D7593A8-AF31-416F-BABA-BE799DE637C6}</Project>
       <Name>Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Mapper\Mapper.csproj">
+      <Project>{04f58052-9fd1-4c84-a52f-bfc8405f9eae}</Project>
+      <Name>Mapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{2a9f91a9-9ba3-4ef5-bf97-2ca5acd35554}</Project>
+      <Name>Models</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

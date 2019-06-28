@@ -1,0 +1,164 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ assembly name="$(SolutionDir)Models\bin\Debug\Models.dll" #>
+<#@ output extension=".cs" #>
+using Models;
+using Models.Loan;
+
+namespace Mapper
+{
+<#
+	Type iLoanObject = typeof(Models.ILoanObject);
+	Type childObjectAttr = typeof(Models.LoanChildObjectAttribute);
+	Type simpleValueAttr = typeof(Models.LoanObjectPropertyAttribute);
+
+	System.Reflection.Assembly modelsAssembly = typeof(Models.Loan.Loan).Assembly;	
+
+	foreach ( Type t in modelsAssembly.ExportedTypes )
+	{
+		if ( t.GetInterfaces().Any(i => i == iLoanObject) && t.IsClass  )
+		{
+						#><#= string.Join(",", t.GetInterfaces().Where(i => i == iLoanObject && i.Name.Contains('`')).Select(x => x.Name)) #><#
+
+			List<System.Reflection.PropertyInfo> complexTypes = new List<System.Reflection.PropertyInfo>();
+			List<System.Reflection.PropertyInfo> simpleTypes = new List<System.Reflection.PropertyInfo>();
+
+			foreach ( System.Reflection.PropertyInfo pi in t.GetProperties() )
+			{
+				Object[] attributes = pi.GetCustomAttributes(childObjectAttr, true);
+				if ( attributes.Any() )
+				{
+					complexTypes.Add(pi);
+				}
+
+				attributes = pi.GetCustomAttributes(simpleValueAttr, true);
+				if ( attributes.Any() )
+				{
+					simpleTypes.Add(pi);
+				}
+			}
+#>
+
+    public static class <#= t.Name #>Extension
+    {
+        public static void MapTo(this Models.Loan.Loan loan, Application.Models.LoanObject loanObject)
+        {
+<#				foreach ( var simpleProp in simpleTypes) { Models.LoanObjectPropertyAttribute attr = simpleProp.GetCustomAttributes(simpleValueAttr, true)[0] as Models.LoanObjectPropertyAttribute;  #>
+            loanObject.MapValue(<#= attr.ID #>, loan.<#= simpleProp.Name #>);
+<#				} #>
+<#				foreach ( var complexProp in complexTypes) { #>
+            loan.<#= complexProp.Name #>?.MapTo(loanObject, FieldList.<#= complexProp.Name #>);
+<#				} #>
+        }
+
+        public static Models.Loan.Loan MapFrom(Application.Models.LoanObject loanObject, Models.Loan.Loan loan = null)
+        {
+			bool changed = false;
+<#				foreach ( var complexProp in complexTypes) { #>
+
+			var _<#= complexProp.Name.ToLower() #> = <#= complexProp.PropertyType.Name #>Extension.MapFrom(loanObject, FieldList.<#= complexProp.Name #>, loan?.<#= complexProp.Name #>);
+			changed = changed || (_<#= complexProp.Name.ToLower() #> != null);
+<#				} #>
+<#				foreach ( var simpleProp in simpleTypes) { #>
+
+            changed = changed || loanObject.ContainsValues(FieldList.<#= simpleProp.Name #>);
+<#				} #>
+
+			if (changed)
+            {
+                if (loan == null)
+                {
+                    loan = new Loan();
+                }
+
+<#				foreach ( var complexProp in complexTypes) { #>
+				loan.<#= complexProp.Name #> = _<#= complexProp.Name.ToLower() #>;
+<#				} #>
+<#				foreach ( var simpleProp in simpleTypes) { #>
+				MappingUtil.SetValue(loanObject, FieldList.<#= simpleProp.Name #>, (val) => loan.<#= simpleProp.Name #> = val, loan.<#= simpleProp.Name #>);
+<#				} #>
+            }
+
+            return loan;
+        }
+	}
+
+<#
+		}
+		else if ( t.GetInterfaces().Any(i => i.Name.Contains("ILoanObject`1")) && t.IsClass  )
+		{
+			var fieldListType = t.GetInterfaces().First(i => i.Name.Contains("ILoanObject`1") && i.IsGenericType).GenericTypeArguments[0];
+
+			List<System.Reflection.PropertyInfo> complexTypes = new List<System.Reflection.PropertyInfo>();
+			List<System.Reflection.PropertyInfo> simpleTypes = new List<System.Reflection.PropertyInfo>();
+
+			foreach ( System.Reflection.PropertyInfo pi in t.GetProperties() )
+			{
+				if ( pi.PropertyType.GetInterfaces().Any(i => i.Name.Contains("ILoanObject`1")) )
+				{
+					complexTypes.Add(pi);
+				}
+				else
+				{
+					simpleTypes.Add(pi);
+				}
+			}
+#>
+
+    public static class <#= t.Name #>Extension
+    {
+        public static void MapTo(this Models.Loan.<#= t.Name #> <#= t.Name.ToLower() #>, Application.Models.LoanObject loanObject, <#= fieldListType.Name #> fields)
+        {
+<#				foreach ( var simpleProp in simpleTypes) { #>
+            loanObject.MapValue(fields.<#= simpleProp.Name #>, <#= t.Name.ToLower() #>.<#= simpleProp.Name #>);
+<#				} #>
+<#				foreach ( var complexProp in complexTypes) { #>
+            <#= t.Name.ToLower() #>.<#= complexProp.Name #>?.MapTo(loanObject, fields.<#= complexProp.Name #>);
+<#				} #>
+        }
+
+        public static Models.Loan.<#= t.Name #> MapFrom(Application.Models.LoanObject loanObject, <#= fieldListType.Name #> fields, Models.Loan.<#= t.Name #> <#= t.Name.ToLower() #> = null)
+        {
+			bool changed = false;
+
+<#				foreach ( var complexProp in complexTypes) { #>
+
+			var _<#= complexProp.Name.ToLower() #> = <#= complexProp.PropertyType.Name #>Extension.MapFrom(loanObject, fields.<#= complexProp.Name #>, <#= t.Name.ToLower() #>?.<#= complexProp.Name #>);
+			changed = changed || _<#= complexProp.Name.ToLower() #>  != null;
+<#				} 
+			if ( simpleTypes.Any() ) {
+#>
+			changed = changed || loanObject.ContainsValues(<#= string.Join(",",  simpleTypes.Select(st => string.Format("fields.{0}", st.Name))) #>);
+			
+<#				} #>
+
+			if (changed)
+            {
+                if (<#= t.Name.ToLower() #> == null)
+                {
+                    <#= t.Name.ToLower() #> = new <#= t.Name #>();
+                }
+
+<#				foreach ( var complexProp in complexTypes) { #>
+				<#= t.Name.ToLower() #>.<#= complexProp.Name #> = _<#= complexProp.Name.ToLower() #>;
+<#				} #>
+<#				foreach ( var simpleProp in simpleTypes) { #>
+				MappingUtil.SetValue(loanObject, fields.<#= simpleProp.Name #>, (val) => <#= t.Name.ToLower() #>.<#= simpleProp.Name #> = val, <#= t.Name.ToLower() #>.<#= simpleProp.Name #>);
+<#				} #>
+            }
+
+            return <#= t.Name.ToLower() #>;
+        }
+
+	}
+
+<#
+		}
+
+
+	}	
+#>
+}
